@@ -1,7 +1,5 @@
 # ADOLab – API RESTful v2 com JWT
 
-Mantido o nome e projeto originais (**ADOLab**), apenas com as mudanças necessárias para expor o CRUD de **Aluno** como **API Web** e proteger os endpoints com **JWT**.
-
 ## Como executar
 ```bash
 dotnet restore
@@ -21,4 +19,7 @@ Depois, clique em **Authorize** no Swagger e informe: `Bearer {seu_token}`.
 - `PUT /api/alunos/{id}` *(Admin)*
 - `DELETE /api/alunos/{id}` *(Admin)*
 
-> Observação: o repositório continua em ADO.NET, mantendo o estilo de comentários XML em PT-BR.
+# Membros do grupo:
+- [Ian Xavier Kuraoka] - RM98860
+- [Aksel Viktor Caminha Rae] - RM99011
+- [Arthur Wollmann Petrin] - RM98735
