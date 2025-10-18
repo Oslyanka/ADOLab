@@ -1,6 +1,5 @@
 namespace ADOLab.Auth
 {
-    /// <summary>Configurações do JWT parametrizadas via appsettings.</summary>
     public class JwtSettings
     {
         public string Issuer { get; set; } = string.Empty;

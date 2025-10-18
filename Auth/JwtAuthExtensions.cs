@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -7,12 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ADOLab.Auth
 {
-    /// <summary>
-    /// Extensão para registrar autenticação JWT.
-    /// </summary>
     public static class JwtAuthExtensions
     {
-        /// <summary>Adiciona autenticação JWT lendo configurações do appsettings.</summary>
         public static IServiceCollection AddJwtAuth(this IServiceCollection services, IConfiguration config)
         {
             var jwtSection = config.GetSection("Jwt");
@@ -20,8 +15,8 @@ namespace ADOLab.Auth
             var settings = jwtSection.Get<JwtSettings>() ?? new JwtSettings();
 
             if (string.IsNullOrWhiteSpace(settings.Key) || settings.Key.Length < 16)
-    throw new InvalidOperationException("Jwt:Key ausente ou muito curta. Defina uma chave forte em appsettings.json.");
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Key));
+                throw new InvalidOperationException("Jwt:Key ausente ou muito curta. Defina uma chave forte em appsettings.json.");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Key));
 
             services.AddAuthentication(options =>
             {
