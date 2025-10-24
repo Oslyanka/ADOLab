@@ -1,12 +1,8 @@
-using System.Collections.Generic;
-
-namespace ADOLab.Models
+public class Professor
 {
-    public class Professor
-    {
-        public int Id { get; set; }
-        public string Nome { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public ICollection<Disciplina> Disciplinas { get; set; } = new List<Disciplina>();
-    }
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public string Email { get; set; } = "";
+
+    public List<Disciplina> Disciplinas { get; set; } = new();
 }

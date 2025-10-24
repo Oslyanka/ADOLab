@@ -1,63 +1,57 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
 
-namespace ADOLab.Auth
+[ApiController]
+[Route("api/v1/auth")]
+public class AuthController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    private readonly UsuarioRepository _userRepo;
+    private readonly JwtService _jwt;
+
+    public AuthController(IConfiguration config)
     {
-        private readonly IConfiguration _config;
-        private readonly JwtSettings _jwtSettings;
+        var connectionString = config.GetConnectionString("SqlServerConnection")!;
+        _userRepo = new UsuarioRepository(connectionString);
+        _userRepo.GarantirEsquema();
+        _jwt = new JwtService(config);
+    }
 
-        public AuthController(IConfiguration config, IOptions<JwtSettings> jwtOptions)
+    /// <summary>
+    /// Registra um novo usuário com hash de senha.
+    /// </summary>
+    [HttpPost("register")]
+    public IActionResult Register([FromBody] Usuario usuario)
+    {
+        if (string.IsNullOrWhiteSpace(usuario.Nome) ||
+            string.IsNullOrWhiteSpace(usuario.Email) ||
+            string.IsNullOrWhiteSpace(usuario.SenhaHash))
         {
-            _config = config;
-            _jwtSettings = jwtOptions.Value;
+            return BadRequest(new { message = "Todos os campos são obrigatórios." });
         }
 
-        public record LoginRequest(string Username, string Password);
-        public record LoginResponse(string Token, DateTime ExpiresAtUtc);
+        // Registra aplicando hash internamente
+        _userRepo.Registrar(usuario.Nome, usuario.Email, usuario.SenhaHash);
 
-        [HttpPost("login")]
-        public ActionResult<LoginResponse> Login([FromBody] LoginRequest req)
+        return Ok(new { message = "Usuário registrado com sucesso." });
+    }
+
+    /// <summary>
+    /// Autentica o usuário e retorna um token JWT.
+    /// </summary>
+    [HttpPost("login")]
+    public IActionResult Login([FromBody] Usuario credenciais)
+    {
+        if (string.IsNullOrWhiteSpace(credenciais.Email) ||
+            string.IsNullOrWhiteSpace(credenciais.SenhaHash))
         {
-            var users = _config.GetSection("Auth:Users").Get<List<Dictionary<string, string>>>() ?? new();
-            var user = users.Find(u =>
-                u.TryGetValue("username", out var un) &&
-                u.TryGetValue("password", out var pw) &&
-                string.Equals(un, req.Username, StringComparison.OrdinalIgnoreCase) &&
-                pw == req.Password
-            );
-            if (user is null) return Unauthorized(new { error = "Credenciais inválidas" });
-            var role = user.TryGetValue("role", out var r) ? r : "User";
-
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, req.Username),
-                new Claim(ClaimTypes.Name, req.Username),
-                new Claim(ClaimTypes.Role, role),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.TokenLifetimeMinutes);
-
-            var token = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: expires,
-                signingCredentials: creds
-            );
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return Ok(new LoginResponse(jwt, expires));
+            return BadRequest(new { message = "Email e senha são obrigatórios." });
         }
+
+        var user = _userRepo.Autenticar(credenciais.Email, credenciais.SenhaHash);
+        if (user == null)
+            return StatusCode(401, new { message = "Credenciais inválidas." });
+
+        var token = _jwt.GerarToken(user);
+        return Ok(new { token });
     }
 }
