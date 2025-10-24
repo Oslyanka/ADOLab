@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ADOLab")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+03b1f8117062e01402432bbe495355e581224ac0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5e5e044ea0d9c58b4e25a74091aa729bf1c09641")]
 [assembly: System.Reflection.AssemblyProductAttribute("ADOLab")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ADOLab")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
